@@ -2,10 +2,40 @@
 
 import { useTenant } from '@/components/tenant/TenantProvider';
 import Link from 'next/link';
+import { useState } from 'react';
+import { FeeDisclosure } from '@/components/fees/FeeDisclosure';
+import { apiClient } from '@/lib/api-client';
 
 export default function FatcaReportingPage() {
     const tenant = useTenant();
     const primaryColor = tenant.branding.primary_color;
+    const [showFee, setShowFee] = useState(false);
+    const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+    const [chargeId, setChargeId] = useState<string | null>(null);
+
+    const handleAcceptFee = async () => {
+        setStatus('processing');
+        try {
+            // In a real app, we would collect payment method ID via Stripe Elements
+            // Here we send a request which will either mock it or fail if no stripe key
+            const paymentMethodId = "pm_card_visa"; // Mock payment method
+
+            const result = await apiClient.chargeFee({
+                fee_code: "TAX_REPORT_FATCA",
+                quantity: 1,
+                payment_method_id: paymentMethodId,
+                reference_type: "tax_report",
+                metadata: { tax_year: new Date().getFullYear() }
+            });
+
+            setChargeId(result.charge_id);
+            setStatus('success');
+            setShowFee(false);
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+        }
+    };
 
     return (
         <div className="space-y-6 max-w-3xl mx-auto">
@@ -44,21 +74,59 @@ export default function FatcaReportingPage() {
                                 <span className="text-gray-700">Form W-9 (Request for Taxpayer ID)</span>
                                 <button className="text-blue-600 font-medium text-sm hover:underline">Download</button>
                             </div>
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                                <span className="text-gray-700">Form 8938 (Statement of Foreign Financial Assets)</span>
-                                <button className="text-blue-600 font-medium text-sm hover:underline">Upload</button>
-                            </div>
                         </div>
                     </div>
 
-                    <div className="pt-6 border-t">
-                        <button
-                            className="w-full py-3 rounded-xl text-white font-medium hover:opacity-90 transition-opacity"
-                            style={{ backgroundColor: primaryColor }}
-                        >
-                            Start FATCA Certification
-                        </button>
-                    </div>
+                    {/* Premium Service Section */}
+                    {status === 'success' ? (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                            <div className="text-green-600 text-5xl mb-2">✅</div>
+                            <h3 className="text-xl font-bold text-green-800">Payment Successful!</h3>
+                            <p className="text-green-700 mt-2">
+                                Your certified FATCA report is being generated.
+                                <br />Charge ID: <span className="font-mono text-sm">{chargeId}</span>
+                            </p>
+                            <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                Download Report PDF
+                            </button>
+                        </div>
+                    ) : showFee ? (
+                        <div className="border-t pt-6">
+                            <h3 className="font-semibold text-gray-900 mb-4">Confirm Service Charge</h3>
+                            <FeeDisclosure
+                                feeCode="TAX_REPORT_FATCA"
+                                baseAmount={0}
+                                quantity={1}
+                                onAccept={handleAcceptFee}
+                                onDecline={() => setShowFee(false)}
+                            />
+                            {status === 'error' && (
+                                <p className="text-red-600 text-sm mt-2">
+                                    Payment failed. Please try again later (or check Stripe config).
+                                </p>
+                            )}
+                            {status === 'processing' && (
+                                <p className="text-blue-600 text-sm mt-2 animate-pulse">
+                                    Processing payment...
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="pt-6 border-t">
+                            <div className="bg-amber-50 rounded-xl p-4 mb-4 border border-amber-100">
+                                <p className="text-amber-800 text-sm font-medium">
+                                    ℹ️ Need a certified report for your accountant? We can generate a fully compliant Form 8938 + FBAR report for you.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowFee(true)}
+                                className="w-full py-3 rounded-xl text-white font-medium hover:opacity-90 transition-opacity"
+                                style={{ backgroundColor: primaryColor }}
+                            >
+                                Generate Certified FATCA Report ($19.99)
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
