@@ -4,7 +4,7 @@
 
 The platform is fully integrated with a FastAPI Backend (Python) and a Next.js Frontend (TypeScript).
 
-### 🔗 **Demo Link:** [http://localhost:3000](http://localhost:3000)
+### 🔗 **Demo Link:** [https://wealth-platform-user-app.vercel.app](https://wealth-platform-user-app.vercel.app)
 
 ---
 
