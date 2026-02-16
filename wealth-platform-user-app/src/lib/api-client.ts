@@ -6,6 +6,7 @@
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true' || typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
 
 interface ApiError {
     code: string;
@@ -88,7 +89,17 @@ class ApiClient {
             (fetchOptions as Record<string, unknown>).next = { revalidate };
         }
 
-        const response = await fetch(`${this.baseUrl}${endpoint}`, fetchOptions);
+        let response: Response;
+        try {
+            response = await fetch(`${this.baseUrl}${endpoint}`, fetchOptions);
+        } catch (err) {
+            // Fallback for Demo Mode if API is unreachable
+            if (IS_DEMO_MODE) {
+                console.warn('API Unreachable, falling back to mock data for demo:', endpoint);
+                return this.getMockData(endpoint, options) as unknown as T;
+            }
+            throw err;
+        }
 
         if (!response.ok) {
             let error: ApiError;
@@ -238,6 +249,40 @@ class ApiClient {
             method: 'POST',
             body: data
         });
+    }
+
+    private getMockData(endpoint: string, options: any): any {
+        if (endpoint.includes('/fees/calculate')) {
+            const body = JSON.parse(options.body || '{}');
+            const amount = body.fee_code === 'TAX_REPORT_FATCA' ? 19.99 : 9.99;
+            return {
+                fee_amount: amount,
+                currency: 'USD',
+                description: 'Demo Fee Calculation',
+                chargeable_to: 'end_user',
+                is_optional: true,
+                breakdown: { rate: null }
+            };
+        }
+        if (endpoint.includes('/fees/charge')) {
+            return {
+                charge_id: 'mock_charge_' + Math.random().toString(36).substring(7),
+                status: 'captured',
+                amount: 19.99,
+                currency: 'USD',
+                created_at: new Date().toISOString()
+            };
+        }
+        if (endpoint.includes('/users/me')) {
+            return {
+                id: 'demo-user',
+                email: 'demo@wealth.com',
+                full_name: 'Demo User',
+                nationality: 'US',
+                residency_country: 'UAE'
+            };
+        }
+        return {};
     }
 }
 
