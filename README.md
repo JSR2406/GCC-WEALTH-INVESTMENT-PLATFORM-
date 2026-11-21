@@ -1,120 +1,47 @@
-<div align="center">
+# GCC WealthTech
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0D1117,50:1a1f35,100:FFD700&height=160&section=header&text=GCC%20Wealth%20Platform&fontSize=36&fontColor=FFD700&fontAlignY=45&animation=fadeIn"/>
+A wealth management prototype for GCC banks and their customers. The Next.js app presents bank-branded onboarding, portfolio, and investing-goal workflows. The FastAPI service and the app's demo routes let developers explore the workflows using sample data.
 
-# 💰 GCC Wealth Investment Platform
+## What to review
 
-**A full-stack AI-powered wealth management and investment platform tailored for the GCC (Gulf Cooperation Council) market — with real-time portfolio analytics, smart investment recommendations, and a modern financial dashboard.**
+- **Bank-branded views** — Open the bank selector or visit `/fab`, `/hsbc`, or `/rajhi` to see the sample tenant experiences.
+- **Portfolio and goals** — Browse sample accounts and portfolio summaries, then explore the goal setup and progress views.
+- **Onboarding and reporting** — Explore the KYC, documents, and tax views, including sample FATCA, CRS, and Zakat workflows.
 
-[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+## Repository layout
 
-🔗 **[Live Demo](https://wealth-platform-user-app.vercel.app)**
+| Path | Responsibility |
+| --- | --- |
+| [wealth-platform-user-app](wealth-platform-user-app) | Next.js App Router frontend, tenant themes, and demo API routes |
+| [Tenant routes](wealth-platform-user-app/src/app/%5Btenant%5D) | Portfolio, goals, onboarding, and tax screens |
+| [Frontend API client](wealth-platform-user-app/src/lib/api-client.ts) | API origin configuration and mock fallbacks |
+| [wealth-platform-backend](wealth-platform-backend) | FastAPI service, SQLAlchemy models, and PostgreSQL configuration |
+| [API entry point](wealth-platform-backend/app/main.py) | FastAPI setup and demo authentication endpoints |
+| [Backend tests](wealth-platform-backend/tests) | Pytest suite, including bank endpoint tests |
 
-</div>
+## Run locally
 
----
+Use Node.js and npm, and Docker with Compose for the backend's documented container setup. Use development-only settings from the [backend environment example](wealth-platform-backend/.env.example). For the database and migration commands, follow the [backend setup guide](wealth-platform-backend/README.md).
 
-## 🧠 Overview
-
-The **GCC Wealth Investment Platform** is a production-ready FinTech application designed for investors across the Gulf Cooperation Council region. It combines real-time market data, AI-driven portfolio optimization, and an intuitive financial dashboard to deliver a comprehensive wealth management experience.
-
----
-
-## ✨ Features
-
-| Feature | Description |
-|---------|-------------|
-| 📊 **Portfolio Dashboard** | Real-time holdings, P&L tracking, and sector allocation |
-| 🤖 **AI Recommendations** | Smart investment suggestions based on risk profile |
-| 📈 **Market Data** | Live prices for GCC stocks, ETFs, crypto, commodities |
-| 🔐 **Risk Assessment** | AI-powered risk profiling and portfolio scoring |
-| 🏆 **GCC Markets** | Saudi Tadawul, UAE DFM/ADX, Kuwait, Qatar stock exchanges |
-| 💳 **Stripe Payments** | Subscription management with Stripe integration |
-| 📊 **Analytics Reports** | Downloadable portfolio performance reports |
-
----
-
-## 🛠️ Tech Stack
-
-### Backend (`wealth-platform-backend/`)
-| Technology | Purpose |
-|------------|---------|
-| **Python / FastAPI** | REST API & business logic |
-| **PostgreSQL** | User & portfolio data |
-| **Stripe** | Payment processing |
-| **Docker** | Containerized deployment |
-| **AI/ML Models** | Investment recommendations |
-
-### Frontend (`wealth-platform-user-app/`)
-| Technology | Purpose |
-|------------|---------|
-| **Next.js / TypeScript** | Full-stack React framework |
-| **Tailwind CSS** | Responsive modern styling |
-| **Recharts** | Financial data visualization |
-| **Vercel** | Deployment platform |
-
----
-
-## 📁 Project Structure
-
-```
-GCC-WEALTH-INVESTMENT-PLATFORM-/
-├── wealth-platform-backend/    # FastAPI Python backend
-│   ├── api/                    # Route handlers
-│   ├── models/                 # Data models & schemas
-│   ├── services/               # Business logic
-│   ├── docker-compose.yml      # Docker setup
-│   └── requirements.txt
-└── wealth-platform-user-app/   # Next.js frontend
-    ├── app/                    # App Router pages
-    ├── components/             # UI components
-    ├── lib/                    # API client & utilities
-    └── package.json
-```
-
----
-
-## 🚀 Getting Started
-
-### Backend
 ```bash
 cd wealth-platform-backend
-docker-compose up --build
-# API runs on http://localhost:8000
+cp .env.example .env
+# Review the example values, then configure local development credentials.
+docker compose up --build
 ```
 
-### Frontend
+In a second terminal, from the repository root:
+
 ```bash
 cd wealth-platform-user-app
-npm install
+npm ci
 npm run dev
-# App runs on http://localhost:3000
 ```
 
----
+Open `http://localhost:3000`. The browser client defaults to `http://localhost:8000/api/v1`. Set `NEXT_PUBLIC_API_URL` in the frontend environment to use a different development API.
 
-## 🌍 GCC Markets Supported
+## Demo limits
 
-- 🇸🇦 Saudi Arabia — Tadawul (Saudi Exchange)
-- 🇦🇪 UAE — DFM (Dubai) & ADX (Abu Dhabi)
-- 🇰🇼 Kuwait — Boursa Kuwait
-- 🇶🇦 Qatar — Qatar Stock Exchange
-- 🇧🇭 Bahrain — Bahrain Bourse
+Use synthetic account data and sample documents. The repository contains mock authentication/data paths and tax screens for demonstration. Live brokerage connectivity, regulatory compliance, and production tenant isolation require independent validation.
 
----
-
-## 👨‍💻 Author
-
-**Janmejay Singh Rathore**
-- 🐙 GitHub: [@JSR2406](https://github.com/JSR2406)
-- 💼 LinkedIn: [janmejay-singh-rathore](https://linkedin.com/in/janmejay-singh-rathore)
-- 📧 Email: janmejaysingh2406@gmail.com
-
-<div align="center">
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FFD700,100:0D1117&height=100&section=footer"/>
-</div>
+[Frontend guide](wealth-platform-user-app/README.md) · [Backend guide](wealth-platform-backend/README.md) · [Janmejay Singh Rathore](https://github.com/JSR2406)
